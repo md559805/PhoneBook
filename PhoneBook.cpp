@@ -22,7 +22,7 @@ Contact *head = nullptr;
 
 void Boxed(const string &message, const string &colorCode = "\033[0m")
 {
-    int width = 100;
+    int width = 80;
     int padding = (width - message.length() - 4) / 2;
     string border = string(width, '-');
     cout << colorCode << border << "\033[0m" << endl;
@@ -75,7 +75,6 @@ void addContact()
     system("cls");
     Contact *newContact = new Contact;
     cout << "\n\033[1mEnter Full Name: \033[0m";
-    cin.ignore();
     getline(cin, newContact->name);
 
     if (isDuplicate(newContact->name))
@@ -98,7 +97,11 @@ void addContact()
     {
         cout << "\033[1mEnter Email: \033[0m";
         getline(cin, newContact->email);
-        if (newContact->email.find('@') == string::npos || newContact->email.find('.') == string::npos)
+        if (newContact->email.empty())
+        {
+            validEmail = true;
+        }
+        else if (newContact->email.find('@') == string::npos || newContact->email.find('.') == string::npos)
         {
             Boxed("Invalid email. Please include '@' and '.' in the email.", "\033[31m\033[1m");
         }
@@ -134,7 +137,23 @@ int countContacts()
 void displayContacts()
 {
     system("cls");
-    if (head == nullptr)
+
+    cout << "\033[1;33mLoading the contacts to display  ";
+    char loadingChars[] = {'\\', '|', '/', '-'};
+    for (int i = 0; i < 12; ++i)
+    {
+        cout << loadingChars[i % 4] << "\b";
+        cout.flush();
+        this_thread::sleep_for(chrono::milliseconds(400));
+    }
+    cout << "\033[0m\n";
+    cout << endl;
+
+    system("cls");
+
+    int contactCount = countContacts();
+
+    if (contactCount == 0)
     {
         Boxed("No contacts to display.", "\033[31m\033[1m");
         cout << "\033[1mWould you like to add a contact? \033[0m\033[1;31m(y/n)\033[0m\033[1m:\033[0m ";
@@ -144,10 +163,14 @@ void displayContacts()
         {
             addContact();
         }
+        else
+        {
+            Boxed("Returning to the Menu.", "\033[32m\033[1m");
+            cout << endl;
+            system("pause");
+        }
         return;
     }
-
-    int contactCount = countContacts();
 
     Boxed("You have " + to_string(contactCount) + " contacts in your phonebook.", "\033[1;3;36m");
     cout << endl;
@@ -166,6 +189,7 @@ void displayContacts()
         cout << endl;
         current = current->next;
     }
+
     system("pause");
 }
 
@@ -188,6 +212,8 @@ void searchContact()
     }
     cout << "\033[0m\n";
     cout << endl;
+
+    system("cls");
 
     Contact *current = head;
     bool foundAny = false;
@@ -221,13 +247,14 @@ void searchContact()
         }
         else
         {
-            return;
+            Boxed("Returning to the Menu.", "\033[32m\033[1m");
         }
     }
     else
     {
         Boxed("Contacts found!", "\033[32m\033[1m");
     }
+    
     cout << endl;
     system("pause");
 }
@@ -239,6 +266,20 @@ void deleteContact()
     cout << "\n\033[1mEnter Name or Number to Delete: \033[0m";
     cin.ignore();
     getline(cin, deleteQuery);
+
+    cout << "\033[1;33mSearching the contact  ";
+    char loadingChars[] = {'\\', '|', '/', '-'};
+    for (int i = 0; i < 12; ++i)
+    {
+        cout << loadingChars[i % 4] << "\b";
+        cout.flush();
+        this_thread::sleep_for(chrono::milliseconds(400));
+    }
+    cout << "\033[0m\n";
+    cout << endl;
+
+    system("cls");
+
     Contact *current = head;
     Contact *previous = nullptr;
     bool foundAny = false;
@@ -287,7 +328,7 @@ void deleteContact()
         }
         else
         {
-            return;
+            Boxed("Returning to the Menu.", "\033[32m\033[1m");
         }
     }
     else
@@ -305,6 +346,19 @@ void editContact()
     cout << "\n\033[1mEnter Name or Number to Edit: \033[0m";
     cin.ignore();
     getline(cin, editQuery);
+
+    cout << "\033[1;33mSearching the contact  ";
+    char loadingChars[] = {'\\', '|', '/', '-'};
+    for (int i = 0; i < 12; ++i)
+    {
+        cout << loadingChars[i % 4] << "\b";
+        cout.flush();
+        this_thread::sleep_for(chrono::milliseconds(400));
+    }
+    cout << "\033[0m\n";
+    cout << endl;
+
+    system("cls");
 
     Contact *current = head;
     bool foundAny = false;
@@ -330,15 +384,16 @@ void editContact()
                 getline(cin, newEmail);
                 if (newEmail.empty())
                 {
-                    if (newEmail.find('@') == string::npos || newEmail.find('.') == string::npos)
-                    {
-                        Boxed("Invalid email. Please include '@' and '.' in the email.", "\033[31m\033[1m");
-                    }
+                    validEmail = true;
                 }
-
-                if (!newEmail.empty())
+                else if (newEmail.find('@') == string::npos || newEmail.find('.') == string::npos)
+                {
+                    Boxed("Invalid email. Please include '@' and '.' in the email.", "\033[31m\033[1m");
+                }
+                else
                 {
                     current->email = newEmail;
+                    validEmail = true;
                 }
             }
 
@@ -360,10 +415,10 @@ void editContact()
 
             Boxed("Contact updated successfully!", "\033[32m\033[1m");
             cout << endl;
+            system("pause");
             return;
         }
         current = current->next;
-        system("pause");
     }
 
     if (!foundAny)
@@ -378,7 +433,7 @@ void editContact()
         }
         else
         {
-            return;
+            Boxed("Returning to the Menu.", "\033[32m\033[1m");
         }
     }
     else
@@ -392,6 +447,20 @@ void editContact()
 void saveContacts()
 {
     system("cls");
+
+    cout << "\033[1;33mSaving the contacts  ";
+    char loadingChars[] = {'\\', '|', '/', '-'};
+    for (int i = 0; i < 12; ++i)
+    {
+        cout << loadingChars[i % 4] << "\b";
+        cout.flush();
+        this_thread::sleep_for(chrono::milliseconds(400));
+    }
+    cout << "\033[0m\n";
+    cout << endl;
+
+    system("cls");
+
     ofstream outFile("contacts.txt");
     if (!outFile)
     {
@@ -414,14 +483,31 @@ void saveContacts()
     system("pause");
 }
 
-void loadContacts()
+void loadContacts(bool showMessage = true)
 {
     system("cls");
+
+    cout << "\033[1;33mLoading the contact  ";
+    char loadingChars[] = {'\\', '|', '/', '-'};
+    for (int i = 0; i < 12; ++i)
+    {
+        cout << loadingChars[i % 4] << "\b";
+        cout.flush();
+        this_thread::sleep_for(chrono::milliseconds(400));
+    }
+    cout << "\033[0m\n";
+    cout << endl;
+
+    system("cls");
+
     ifstream inFile("contacts.txt");
     if (!inFile)
     {
-        Boxed("No saved contacts found.", "\033[31m\033[1m");
-        cout << endl;
+        if (showMessage)
+        {
+            Boxed("No saved contacts found.", "\033[31m\033[1m");
+            cout << endl;
+        }
         return;
     }
     head = nullptr;
@@ -436,14 +522,18 @@ void loadContacts()
         head = newContact;
     }
     inFile.close();
-    Boxed("Contacts loaded successfully!", "\033[32m\033[1m");
-    cout << endl;
-    system("cls");
+    if (showMessage)
+    {
+        Boxed("Contacts loaded successfully!", "\033[32m\033[1m");
+        cout << endl;
+        system("pause");
+    }
 }
 
 void displayMenu(int selectedOption)
 {
     system("cls");
+
     Boxed("Phonebook Menu:", "\033[1;94m");
     string options[] = {
         "1. Add Contact",
@@ -500,7 +590,20 @@ int navigateMenu()
 
 int main()
 {
-    loadContacts();
+    loadContacts(false);
+    system("cls");
+
+    cout << "\033[1;33mPreparing the Menu";
+    for (int i = 0; i < 3; ++i)
+    {
+        cout << ".";
+        cout.flush();
+        this_thread::sleep_for(chrono::milliseconds(1000));
+    }
+    cout << "\033[0m\n";
+    cout << endl;
+
+    system("cls");
 
     while (true)
     {
@@ -508,46 +611,46 @@ int main()
 
         switch (choice)
         {
-            case 0:
-                addContact();
-                break;
-            case 1:
-                displayContacts();
-                break;
-            case 2:
-                searchContact();
-                break;
-            case 3:
-                deleteContact();
-                break;
-            case 4:
-                editContact();
-                break;
-            case 5:
-                saveContacts();
-                break;
-            case 6:
-                loadContacts();
-                break;
-            case 7:
+        case 0:
+            addContact();
+            break;
+        case 1:
+            displayContacts();
+            break;
+        case 2:
+            searchContact();
+            break;
+        case 3:
+            deleteContact();
+            break;
+        case 4:
+            editContact();
+            break;
+        case 5:
+            saveContacts();
+            break;
+        case 6:
+            loadContacts();
+            break;
+        case 7:
+        {
+            cout << "\n\033[1mAre you sure you want to exit?\033[0m \033[1;31m(y/n)\033[0m\033[1m:\033[0m ";
+            char exitChoice = _getch();
+            cout << exitChoice << endl;
+
+            if (exitChoice == 'y' || exitChoice == 'Y')
             {
-                cout << "\n\033[1mAre you sure you want to exit?\033[0m \033[1;31m(y/n)\033[0m\033[1m:\033[0m ";
-                char exitChoice = _getch();
-                cout << exitChoice << endl;
-                
-                if (exitChoice == 'y' || exitChoice == 'Y')
-                {
-                    saveContacts();
-                    cout << endl;
-                    Boxed("Exiting Phonebook. Goodbye!", "\033[32m\033[1m");
-                    return 0;
-                }
-                break;
+                saveContacts();
+                cout << endl;
+                Boxed("Exiting Phonebook. Goodbye!", "\033[32m\033[1m");
+                return 0;
             }
-            
-            default:
-                Boxed("Invalid choice. Please try again.", "\033[31m\033[1m");
-                break;
+            break;
+        }
+
+        default:
+            Boxed("Invalid choice. Please try again.", "\033[31m\033[1m");
+            break;
         }
     }
     return 0;
